@@ -1,6 +1,7 @@
+<<<<<<< HEAD
 # gotit
 
-FIXME
+By SDUT Linux Group
 
 ## Prerequisites
 
@@ -16,4 +17,4 @@ To start a web server for the application, run:
 
 ## License
 
-Copyright © 2015 FIXME
+Copyright © 2015 SDUTLinux
