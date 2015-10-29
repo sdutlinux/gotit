@@ -6,7 +6,8 @@
                  [clj-tagsoup "0.3.0"]
                  [clj-http "2.0.0"]
                  [compojure "1.4.0"]
-                 [ring/ring-defaults "0.1.5"]]
+                 [ring/ring-defaults "0.1.5"]
+                 [enlive "1.1.6"]]
   :plugins [[lein-ring "0.9.7"]]
   :ring {:handler gotit.handler/app}
   :profiles

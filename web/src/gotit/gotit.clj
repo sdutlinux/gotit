@@ -1,6 +1,24 @@
 (ns gotit.gotit
   (:require [clj-http.client :as chc]
-            [pl.danieljanus.tagsoup :as ts]))
+            [pl.danieljanus.tagsoup :as ts]
+            [net.cgrand.enlive-html :as html])
+  (:import [java.nio.charset StandardCharsets]
+           [java.io ByteArrayInputStream]
+           [java.io InputStream]))
+
+(defn ^InputStream s->is
+  [^String s]
+  (ByteArrayInputStream. (.getBytes s StandardCharsets/UTF_8)))
+
+(defn get-index
+  []
+  (-> (html/html-resource
+       (s->is (:body (chc/get "http://210.44.176.43/default_ldap.aspx" {:as "GB2312"}))))
+      (html/select [[:input (html/attr= :name "__VIEWSTATE")]])
+      first
+      :attrs
+      :value))
+;;InputStream stream = new ByteArrayInputStream(exampleString.getBytes(StandardCharsets.UTF_8));
 
 (defn get-cet
   [number name-]
