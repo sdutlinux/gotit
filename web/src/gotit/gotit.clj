@@ -1,24 +1,73 @@
 (ns gotit.gotit
   (:require [clj-http.client :as chc]
             [pl.danieljanus.tagsoup :as ts]
-            [net.cgrand.enlive-html :as html])
+            [net.cgrand.enlive-html :as html]
+            [gotit.config :as config])
   (:import [java.nio.charset StandardCharsets]
            [java.io ByteArrayInputStream]
            [java.io InputStream]))
 
-(defn ^InputStream s->is
-  [^String s]
-  (ByteArrayInputStream. (.getBytes s StandardCharsets/UTF_8)))
+(defn gtget
+  [url & [opts]]
+  (chc/get url
+           (merge {:as "GB2312"}
+                  opts)))
 
-(defn get-index
-  []
-  (-> (html/html-resource
-       (s->is (:body (chc/get "http://210.44.176.43/default_ldap.aspx" {:as "GB2312"}))))
+(defn gtpost
+  [url & [opts]]
+  (chc/post url
+           (merge {:as "GB2312"}
+                  opts)))
+
+(defn ^InputStream s->dom
+  [^String s]
+  (html/html-resource
+   (ByteArrayInputStream. (.getBytes s StandardCharsets/UTF_8))))
+
+(defn get-vs
+  [body]
+  (-> (s->dom body)
       (html/select [[:input (html/attr= :name "__VIEWSTATE")]])
       first
       :attrs
       :value))
-;;InputStream stream = new ByteArrayInputStream(exampleString.getBytes(StandardCharsets.UTF_8));
+
+(defn get-login-notic
+  [body]
+  (-> (s->dom body)
+      (html/select [[:script (html/attr= :language "javascript" :defer "defer")]])
+      first
+      :content))
+
+(defn get-index
+  []
+  (let [resp (gtget (format "http://%s/" config/zfhost))
+        code (chc/get (format "http://%s/CheckCode.aspx" config/zfhost
+                              {:cookies resp}))]
+    resp))
+
+(defn login
+  []
+  (let [resp (get-index)
+        vs (get-vs (:body resp))
+        cookies (:cookies resp)]
+    (gtpost "http://210.44.176.43/default2.aspx"
+            {:headers {"User-Agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36"
+                       "Referer" "http://210.44.176.43/"
+                       "Upgrade-Insecure-Requests" "1"
+                       "Origin" "http://210.44.176.43"
+                       "Host" "210.44.176.43"
+                       "Connection" "Keep-Alive"}
+             :form-params {:__VIEWSTATE vs
+                           :txtUserName "hello"
+                           :TextBox2 "hello"
+                           :txtSecretCode "hello"
+                           :RadioButtonList1 "学生"
+                           :Button1 ""
+                           :lbLanguage ""
+                           :hidPdrs ""
+                           :hidsc ""}
+             :cookies cookies})))
 
 (defn get-cet
   [number name-]
