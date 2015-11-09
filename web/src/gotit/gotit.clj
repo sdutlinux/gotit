@@ -21,8 +21,8 @@
 
 (defn ^InputStream s->dom
   [^String s]
-  (html/html-resource
-   (ByteArrayInputStream. (.getBytes s StandardCharsets/UTF_8))))
+  (with-open [is (ByteArrayInputStream. (.getBytes s StandardCharsets/UTF_8))]
+    (html/html-resource is)))
 
 (defn get-vs
   [body]
