@@ -46,22 +46,28 @@
                               {:cookies resp}))]
     resp))
 
+(defn generate-header
+  [referer & [opts]]
+  (merge
+   {"User-Agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36"
+    "Referer" referer
+    "Upgrade-Insecure-Requests" "1"
+    "Origin" "http://210.44.176.43"
+    "Host" "210.44.176.43"
+    "Connection" "Keep-Alive"}
+   opts))
+
 (defn login
-  []
+  [xh pwd code]
   (let [resp (get-index)
         vs (get-vs (:body resp))
         cookies (:cookies resp)]
     (gtpost "http://210.44.176.43/default2.aspx"
-            {:headers {"User-Agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36"
-                       "Referer" "http://210.44.176.43/"
-                       "Upgrade-Insecure-Requests" "1"
-                       "Origin" "http://210.44.176.43"
-                       "Host" "210.44.176.43"
-                       "Connection" "Keep-Alive"}
+            {:headers (generate-header "http://210.44.176.43/")
              :form-params {:__VIEWSTATE vs
-                           :txtUserName "hello"
-                           :TextBox2 "hello"
-                           :txtSecretCode "hello"
+                           :txtUserName xh
+                           :TextBox2 pwd
+                           :txtSecretCode code
                            :RadioButtonList1 "学生"
                            :Button1 ""
                            :lbLanguage ""
