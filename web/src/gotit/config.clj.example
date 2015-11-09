@@ -1,0 +1,3 @@
+(ns gotit.config)
+
+(def zfhost "210.44.176.43")
