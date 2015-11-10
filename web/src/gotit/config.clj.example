@@ -1,3 +1,35 @@
-(ns gotit.config)
+(ns gotit.config
+  (:require [taoensso.carmine.ring :refer [carmine-store]]))
 
-(def zfhost "210.44.176.43")
+(def zfhost "")
+
+(def redis-conn {:pool {} :spec {:host "" :port 6379
+                                 :timeout-ms 6000}})
+
+(def zfck :zf-cookies)
+
+(defonce session-store
+  (carmine-store redis-conn {:key-prefix ""
+                             :expiration-secs 100}))
+
+(def site-defaults
+  "A default configuration for a browser-accessible website, based on current
+  best practice."
+  {:params    {:urlencoded true
+               :multipart  true
+               :nested     true
+               :keywordize true}
+   :cookies   {:max-age (* 3600 24 30)}
+   :session   {:flash true
+               :store session-store
+               :cookie-name "FIX ME"
+               :cookie-attrs {:http-only true
+                              :max-age (* 3600 24 30)}}
+   :security  {:anti-forgery   false
+               :xss-protection {:enable? true, :mode :block}
+               :frame-options  :sameorigin
+               :content-type-options :nosniff}
+   :static    {:resources "public"}
+   :responses {:not-modified-responses true
+               :absolute-redirects     true
+               :content-types          true}})
